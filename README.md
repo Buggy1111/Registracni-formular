@@ -37,7 +37,6 @@ Vytvořit formulář s následujícími poli:
 
 #### 2. **Toast Notifikace** 🍞
 - Úspěšné odeslání formuláře
-- Uložení/obnovení draftu
 - Reset formuláře
 - react-hot-toast integrace
 
@@ -60,35 +59,28 @@ Vytvořit formulář s následujícími poli:
 - **Heslo:** min 8 znaků, malé + velké písmeno + číslo
 - Real-time error messages
 
-#### 6. **LocalStorage Draft Mode** 💾
-- Tlačítko "Uložit rozpracovaný formulář"
-- Automatická detekce uloženého draftu
-- Alert upozornění když je draft k dispozici
-- Tlačítko "Obnovit uložený formulář"
-- Persistence mezi sessions
-
-#### 7. **Framer Motion Animace** 🎬
+#### 6. **Framer Motion Animace** 🎬
 - Fade in efekt při načtení formuláře
 - Smooth transitions
 - Professional feel
 
-#### 8. **Error Boundary** 🛡️
+#### 7. **Error Boundary** 🛡️
 - Production-ready error handling
 - Graceful degradation
 - React Error Boundary pattern
 
-#### 9. **Accessibility (A11y)** ♿
+#### 8. **Accessibility (A11y)** ♿
 - ARIA labels na všech polích
 - aria-required attributes
 - Keyboard navigation support
 - Screen reader friendly
 
-#### 10. **Success Message** ✅
+#### 9. **Success Message** ✅
 - Collapse animace po úspěšném odeslání
 - Auto-reset formuláře po 3 sekundách
 - Visual feedback s ikonou
 
-#### 11. **Professional Styling** 🎨
+#### 10. **Professional Styling** 🎨
 - Gradient backgrounds (light/dark)
 - Perfect spacing a typography
 - Responsive design
@@ -194,29 +186,18 @@ const theme = useMemo(
 );
 ```
 
-### Draft Mode
-
-Formulář automaticky ukládá rozpracovaná data:
-
-```typescript
-const saveDraft = (values: FormValues) => {
-  localStorage.setItem('formDraft', JSON.stringify(values));
-  toast.success('Rozpracovaný formulář uložen');
-};
-```
-
 ---
 
 ## 📊 Validační Pravidla
 
 | Pole | Pravidla |
 |------|----------|
-| **Jméno** | Min 2 znaky (optional) |
-| **Příjmení** | Min 2 znaky (optional) |
+| **Jméno** | Min 2 znaky (povinné) |
+| **Příjmení** | Min 2 znaky (povinné) |
 | **Username** | 3-20 znaků, pouze a-z, A-Z, 0-9, _ (povinné) |
 | **Email** | Validní email formát (povinné) |
-| **Heslo** | Min 8 znaků, malé + velké písmeno + číslo (optional) |
-| **Kraj** | Select z 14 krajů ČR (optional) |
+| **Heslo** | Min 8 znaků, malé + velké písmeno + číslo (povinné) |
+| **Kraj** | Select z 14 krajů ČR (povinné) |
 
 ---
 
@@ -225,10 +206,9 @@ const saveDraft = (values: FormValues) => {
 ### Základní Workflow
 
 1. **Vyplnění formuláře** - všechna pole s live validací
-2. **Uložení draftu** - kliknutím na "💾 Uložit rozpracovaný formulář"
-3. **Dark mode** - přepnutí pomocí ikony 🌙/☀️
-4. **Odeslání** - tlačítko "Odeslat" (vyžaduje povinná pole)
-5. **Reset** - tlačítko "Reset" vymaže všechna pole
+2. **Dark mode** - přepnutí pomocí ikony 🌙/☀️
+3. **Odeslání** - tlačítko "Odeslat" (vyžaduje povinná pole)
+4. **Reset** - tlačítko "Reset" vymaže všechna pole
 
 ### Testování Validace
 

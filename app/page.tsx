@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Formik, Form } from 'formik';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Formik, Form, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import {
   TextField,
@@ -25,7 +25,7 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 import SaveIcon from '@mui/icons-material/Save';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 
 // Data pro kraje ČR
@@ -74,8 +74,12 @@ const passwordStrength = (password: string): { strength: number; label: string; 
 
 // Validační schéma s Yup
 const validationSchema = Yup.object({
-  jmeno: Yup.string().min(2, 'Jméno musí mít alespoň 2 znaky'),
-  prijmeni: Yup.string().min(2, 'Příjmení musí mít alespoň 2 znaky'),
+  jmeno: Yup.string()
+    .required('Jméno je povinné')
+    .min(2, 'Jméno musí mít alespoň 2 znaky'),
+  prijmeni: Yup.string()
+    .required('Příjmení je povinné')
+    .min(2, 'Příjmení musí mít alespoň 2 znaky'),
   username: Yup.string()
     .required('Uživatelské jméno je povinné')
     .min(3, 'Uživatelské jméno musí mít alespoň 3 znaky')
@@ -85,11 +89,12 @@ const validationSchema = Yup.object({
     .email('Neplatný formát emailu')
     .required('Email je povinný'),
   heslo: Yup.string()
+    .required('Heslo je povinné')
     .min(8, 'Heslo musí mít alespoň 8 znaků')
     .matches(/[a-z]/, 'Musí obsahovat malé písmeno')
     .matches(/[A-Z]/, 'Musí obsahovat velké písmeno')
     .matches(/[0-9]/, 'Musí obsahovat číslo'),
-  kraj: Yup.string(),
+  kraj: Yup.string().required('Výběr kraje je povinný'),
 });
 
 // Error Boundary Component
@@ -153,50 +158,41 @@ export default function Home() {
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
   }, [darkMode]);
 
-  // Načtení draft dat z localStorage
-  const loadDraft = (): FormValues | null => {
-    if (typeof window === 'undefined') return null;
-    const draft = localStorage.getItem('formDraft');
-    return draft ? JSON.parse(draft) : null;
-  };
-
-  // Uložení draft dat do localStorage
-  const saveDraft = (values: FormValues) => {
-    localStorage.setItem('formDraft', JSON.stringify(values));
-    toast.success('Rozpracovaný formulář uložen', {
-      icon: '💾',
-      duration: 2000,
-    });
-  };
-
-  const handleSubmit = async (values: FormValues, { resetForm }: any) => {
+  const handleSubmit = useCallback(async (
+    values: FormValues,
+    { resetForm }: FormikHelpers<FormValues>
+  ) => {
     setIsSubmitting(true);
 
-    // Simulace async operace
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      // Simulace async operace
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-    console.log('Odeslaná data:', values);
+      // Log pouze v development módu
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Odeslaná data:', values);
+      }
 
-    // Úspěšný submit
-    toast.success('Formulář úspěšně odeslán!', {
-      icon: '✅',
-      duration: 3000,
-    });
+      // Úspěšný submit
+      toast.success('Formulář úspěšně odeslán!', {
+        icon: '✅',
+        duration: 3000,
+      });
 
-    setShowSuccess(true);
-    setIsSubmitting(false);
+      setShowSuccess(true);
 
-    // Vymazání draftu
-    localStorage.removeItem('formDraft');
-
-    // Reset po 3 sekundách
-    setTimeout(() => {
-      setShowSuccess(false);
-      resetForm();
-    }, 3000);
-  };
-
-  const draft = loadDraft();
+      // Reset po 3 sekundách
+      setTimeout(() => {
+        setShowSuccess(false);
+        resetForm();
+      }, 3000);
+    } catch (error) {
+      console.error('Chyba při odesílání:', error);
+      toast.error('Nepodařilo se odeslat formulář');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, []);
 
   return (
     <ErrorBoundary>
@@ -204,54 +200,68 @@ export default function Home() {
         <CssBaseline />
         <Toaster position="top-right" />
 
-        <Container maxWidth="sm" sx={{ py: 4 }}>
+        <Container
+          maxWidth="sm"
+          sx={{
+            py: { xs: 1, sm: 2 },
+            px: { xs: 1, sm: 2 },
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            style={{ width: '100%' }}
           >
             <Paper
               elevation={darkMode ? 8 : 3}
               sx={{
-                p: 4,
+                p: { xs: 2, sm: 2.5 },
                 background: darkMode
                   ? 'linear-gradient(145deg, #1e1e1e 0%, #2d2d2d 100%)'
                   : 'linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)',
               }}
             >
               {/* Header s dark mode toggle */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" component="h1" fontWeight="bold">
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 1, sm: 1.5 } }}>
+                <Typography
+                  variant="h5"
+                  component="h1"
+                  fontWeight="bold"
+                  sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
+                >
                   Registrační formulář
                 </Typography>
                 <IconButton
                   onClick={() => setDarkMode(!darkMode)}
                   color="inherit"
                   aria-label="Přepnout motiv"
+                  size="small"
                 >
                   {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
                 </IconButton>
               </Box>
 
-              <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
-                Vyplňte prosím všechny povinné pole označené hvězdičkou (*)
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+                sx={{ mb: { xs: 1, sm: 1.5 }, fontSize: { xs: '0.7rem', sm: '0.75rem' } }}
+              >
+                Všechna pole jsou povinná (*)
               </Typography>
-
-              {/* Draft notification */}
-              {draft && !showSuccess && (
-                <Alert severity="info" sx={{ mb: 3 }}>
-                  Našli jsme uložený rozpracovaný formulář. Klikněte na tlačítko pro obnovení dat.
-                </Alert>
-              )}
 
               {/* Success message */}
               <Collapse in={showSuccess}>
                 <Alert
                   severity="success"
-                  icon={<CheckCircleIcon />}
-                  sx={{ mb: 3 }}
+                  icon={<CheckCircleIcon fontSize="small" />}
+                  sx={{ mb: 1.5, py: 0.5 }}
                 >
-                  Formulář byl úspěšně odeslán! Data najdete v konzoli.
+                  <Typography variant="caption">Formulář byl úspěšně odeslán!</Typography>
                 </Alert>
               </Collapse>
 
@@ -260,7 +270,7 @@ export default function Home() {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ values, errors, touched, handleChange, handleBlur, setValues }) => {
+                {({ values, errors, touched, handleChange, handleBlur, resetForm }) => {
                   const passwordInfo = values.heslo ? passwordStrength(values.heslo) : null;
 
                   return (
@@ -270,7 +280,7 @@ export default function Home() {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
                       >
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.2, sm: 1.5 } }}>
 
                           {/* Jméno */}
                           <TextField
@@ -284,10 +294,11 @@ export default function Home() {
                             onBlur={handleBlur}
                             error={touched.jmeno && Boolean(errors.jmeno)}
                             helperText={touched.jmeno && errors.jmeno}
+                            required
                             disabled={isSubmitting}
                             inputProps={{
                               'aria-label': 'Jméno',
-                              'aria-required': 'false',
+                              'aria-required': 'true',
                             }}
                           />
 
@@ -303,10 +314,11 @@ export default function Home() {
                             onBlur={handleBlur}
                             error={touched.prijmeni && Boolean(errors.prijmeni)}
                             helperText={touched.prijmeni && errors.prijmeni}
+                            required
                             disabled={isSubmitting}
                             inputProps={{
                               'aria-label': 'Příjmení',
-                              'aria-required': 'false',
+                              'aria-required': 'true',
                             }}
                           />
 
@@ -315,7 +327,7 @@ export default function Home() {
                             fullWidth
                             id="username"
                             name="username"
-                            label="Uživatelské jméno *"
+                            label="Uživatelské jméno"
                             placeholder="Zadejte uživatelské jméno"
                             value={values.username}
                             onChange={handleChange}
@@ -335,7 +347,7 @@ export default function Home() {
                             fullWidth
                             id="email"
                             name="email"
-                            label="Email *"
+                            label="Email"
                             type="email"
                             placeholder="Zadejte váš email"
                             value={values.email}
@@ -365,10 +377,11 @@ export default function Home() {
                               onBlur={handleBlur}
                               error={touched.heslo && Boolean(errors.heslo)}
                               helperText={touched.heslo && errors.heslo}
+                              required
                               disabled={isSubmitting}
                               inputProps={{
                                 'aria-label': 'Heslo',
-                                'aria-required': 'false',
+                                'aria-required': 'true',
                               }}
                             />
                             {passwordInfo && values.heslo && (
@@ -403,10 +416,11 @@ export default function Home() {
                             onBlur={handleBlur}
                             error={touched.kraj && Boolean(errors.kraj)}
                             helperText={touched.kraj && errors.kraj}
+                            required
                             disabled={isSubmitting}
                             inputProps={{
                               'aria-label': 'Kraj',
-                              'aria-required': 'false',
+                              'aria-required': 'true',
                             }}
                           >
                             <MenuItem value="">
@@ -420,16 +434,24 @@ export default function Home() {
                           </TextField>
 
                           {/* Tlačítka */}
-                          <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
+                          <Box sx={{
+                            display: 'flex',
+                            gap: { xs: 1, sm: 1.5 },
+                            mt: { xs: 0.5, sm: 1 },
+                            flexDirection: { xs: 'column', sm: 'row' }
+                          }}>
                             <Button
                               type="submit"
                               variant="contained"
                               color="primary"
                               fullWidth
-                              size="large"
+                              size="medium"
                               disabled={isSubmitting}
-                              startIcon={isSubmitting ? <CircularProgress size={20} /> : <SaveIcon />}
-                              sx={{ flex: 1 }}
+                              startIcon={isSubmitting ? <CircularProgress size={18} /> : <SaveIcon />}
+                              sx={{
+                                flex: { sm: 1 },
+                                fontSize: { xs: '0.875rem', sm: '0.9375rem' }
+                              }}
                             >
                               {isSubmitting ? 'Odesílám...' : 'Odeslat'}
                             </Button>
@@ -439,65 +461,28 @@ export default function Home() {
                               variant="outlined"
                               color="secondary"
                               fullWidth
-                              size="large"
+                              size="medium"
                               disabled={isSubmitting}
                               startIcon={<RestartAltIcon />}
                               onClick={() => {
-                                setValues(initialValues);
-                                localStorage.removeItem('formDraft');
+                                resetForm();
                                 toast.success('Formulář resetován');
                               }}
-                              sx={{ flex: 1 }}
+                              sx={{
+                                flex: { sm: 1 },
+                                fontSize: { xs: '0.875rem', sm: '0.9375rem' }
+                              }}
                             >
                               Reset
                             </Button>
                           </Box>
 
-                          {/* Draft tlačítka */}
-                          <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
-                            <Button
-                              type="button"
-                              variant="text"
-                              size="small"
-                              fullWidth
-                              disabled={isSubmitting}
-                              onClick={() => saveDraft(values)}
-                            >
-                              💾 Uložit rozpracovaný formulář
-                            </Button>
-
-                            {draft && (
-                              <Button
-                                type="button"
-                                variant="text"
-                                size="small"
-                                fullWidth
-                                disabled={isSubmitting}
-                                onClick={() => {
-                                  setValues(draft);
-                                  toast.success('Formulář obnoven z úložiště');
-                                }}
-                              >
-                                📂 Obnovit uložený formulář
-                              </Button>
-                            )}
-                          </Box>
                         </Box>
                       </motion.div>
                     </Form>
                   );
                 }}
               </Formik>
-
-              {/* Footer */}
-              <Box sx={{ mt: 4, pt: 3, borderTop: 1, borderColor: 'divider' }}>
-                <Typography variant="caption" color="text.secondary" align="center" display="block">
-                  Vytvořeno s ❤️ pomocí React, TypeScript, Material UI, Formik & Yup
-                </Typography>
-                <Typography variant="caption" color="text.secondary" align="center" display="block" sx={{ mt: 0.5 }}>
-                  AI-powered development • E LINKX úkol 2025
-                </Typography>
-              </Box>
             </Paper>
           </motion.div>
         </Container>
