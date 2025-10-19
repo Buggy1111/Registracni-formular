@@ -112,8 +112,8 @@ Vytvořit formulář s následujícími poli:
 
 ```bash
 # Naklonovat projekt
-git clone <repository-url>
-cd e-linkx-formular
+git clone https://github.com/Buggy1111/Registracni-formular
+cd Registracni-formular
 
 # Nainstalovat závislosti
 npm install
@@ -139,7 +139,7 @@ npm start
 ## 📁 Struktura Projektu
 
 ```
-e-linkx-formular/
+Registracni-formular/
 ├── app/
 │   ├── page.tsx          # Hlavní formulář komponenta
 │   ├── layout.tsx        # Root layout
@@ -261,7 +261,7 @@ Tento projekt byl vytvořen s pomocí **Claude Code** (Anthropic) jako demonstra
 
 ## 📧 Kontakt
 
-**Michal Burgermeiste**
+**Michal Bürgermeister**
 - 📱 +420 605 954 429
 - 📧 michalbugy12@gmail.com
 - 🌐 Portfolio: https://portfolio-web-two-mu.vercel.app
@@ -279,4 +279,4 @@ MIT License - volně použitelné pro vzdělávací a komerční účely.
 **Vytvořeno s:** React 19 • TypeScript 5 • Material UI v6 • Formik • Yup
 **Přidaná hodnota:** 10+ extra features nad rámec zadání
 
-*"Z jednoduchého zadání na profesionální showpiece za pár hodin díky AI-native workflow!"* 🚀
+*"Z jednoduchého zadání na profesionální showpiece za 80 min díky AI-native workflow!"* 🚀
