@@ -113,7 +113,7 @@ Vytvořit formulář s následujícími poli:
 ```bash
 # Naklonovat projekt
 git clone <repository-url>
-cd e-linkx-formular
+cd Registracni-formular
 
 # Nainstalovat závislosti
 npm install
