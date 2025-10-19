@@ -112,7 +112,7 @@ Vytvořit formulář s následujícími poli:
 
 ```bash
 # Naklonovat projekt
-git clone <repository-url>
+git clone https://github.com/Buggy1111/Registracni-formular
 cd Registracni-formular
 
 # Nainstalovat závislosti
@@ -139,7 +139,7 @@ npm start
 ## 📁 Struktura Projektu
 
 ```
-e-linkx-formular/
+Registracni-formular/
 ├── app/
 │   ├── page.tsx          # Hlavní formulář komponenta
 │   ├── layout.tsx        # Root layout
